@@ -98,11 +98,13 @@ class App extends React.Component<{}, State> {
 
       const uuid = uuidv4();
       const imageRef = this.storageRef.child(uuid + imageType);
-
+      
       try {
         await imageRef.put(file);
+        message.success("Image uploaded successfully");
         this.setState({ numImages: this.state.numImages + 1 });
       } catch (err) {
+        message.error("Image failed to upload.");
         console.log(err);
       }
     }
@@ -118,9 +120,9 @@ class App extends React.Component<{}, State> {
     return (
       <div className="App" >
         <header className="App-header">
-          <Button type="primary" onClick={() => message.info('This is a normal message')}>
+          {/* <Button type="primary" onClick={() => message.info('This is a normal message')}>
             Display normal message
-          </Button>
+          </Button> */}
           <img src={this.state.imgUrl} style={{ height: 300, width: 300 }} />
           <button onClick={this.uploadImage}>Upload an image</button>
           <input type="file" id="file" ref={this.inputOpenFileRef} style={{ display: "none" }} onChange={this.handleFileSelection} />
