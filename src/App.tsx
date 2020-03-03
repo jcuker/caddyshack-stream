@@ -4,6 +4,7 @@ import firebase from 'firebase';
 import app from 'firebase/app';
 import { firebaseConfig } from './firebase';
 import { v4 as uuidv4 } from 'uuid';
+import { Button, message } from 'antd';
 
 interface State {
   imgUrl: string,
@@ -11,10 +12,9 @@ interface State {
   lastImageIndex: number;
 };
 
-
 class App extends React.Component<{}, State> {
   private storageRef: any;
-  private imageRefreshInterval: any;
+  private imageRefreshIntervalHandle: any;
 
   private readonly REFRESH_INTERVAL: number = 2000;
   private readonly loadingPlaceholderImage: string = 'https://via.placeholder.com/150';
@@ -45,11 +45,11 @@ class App extends React.Component<{}, State> {
     this.storageRef = storage.ref();
 
     this.getImageFromFirebase();
-    this.imageRefreshInterval = setInterval(this.getImageFromFirebase, this.REFRESH_INTERVAL);
+    this.imageRefreshIntervalHandle = setInterval(this.getImageFromFirebase, this.REFRESH_INTERVAL);
   }
 
   componentWillUnmount() {
-    clearInterval(this.imageRefreshInterval);
+    clearInterval(this.imageRefreshIntervalHandle);
   }
 
   private async getImageFromFirebase() {
@@ -118,11 +118,14 @@ class App extends React.Component<{}, State> {
     return (
       <div className="App" >
         <header className="App-header">
+          <Button type="primary" onClick={() => message.info('This is a normal message')}>
+            Display normal message
+          </Button>
           <img src={this.state.imgUrl} style={{ height: 300, width: 300 }} />
           <button onClick={this.uploadImage}>Upload an image</button>
           <input type="file" id="file" ref={this.inputOpenFileRef} style={{ display: "none" }} onChange={this.handleFileSelection} />
         </header>
-      </div>
+      </div >
     );
   }
 
