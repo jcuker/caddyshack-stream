@@ -4,12 +4,14 @@ import firebase from 'firebase';
 import app from 'firebase/app';
 import { firebaseConfig } from './firebase';
 import { v4 as uuidv4 } from 'uuid';
-import { Button, message } from 'antd';
+import { message, Progress, Button } from 'antd';
 
 interface State {
   imgUrl: string,
   numImages: number,
   lastImageIndex: number;
+  progress: number;
+  showProgress: boolean;
 };
 
 class App extends React.Component<{}, State> {
@@ -26,7 +28,10 @@ class App extends React.Component<{}, State> {
     this.state = {
       imgUrl: '',
       numImages: 0,
-      lastImageIndex: -1
+      lastImageIndex: -1,
+      progress: 0,
+      showProgress: false
+
     }
     this.getImageFromFirebase = this.getImageFromFirebase.bind(this);
     this.uploadImage = this.uploadImage.bind(this);
@@ -98,17 +103,58 @@ class App extends React.Component<{}, State> {
 
       const uuid = uuidv4();
       const imageRef = this.storageRef.child(uuid + imageType);
+      const uploadTask = imageRef.put(file);
+
+      // try {
+      //   await uploadTask
+      //   uploadTask.on('state_changed', (snapshot: { bytesTransferred: number; totalBytes: number; }) => {
+      //     const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      //     console.log('Upload is ' + progress + '% done');
+      //     this.setState({progress: this.state.progress});
+      //     })
+        
+        
+      //   message.success("Image uploaded successfully");
+      //   this.setState({ numImages: this.state.numImages + 1 });
+      // } catch (err) {
+      //   message.error("Image failed to upload.");
+      //   console.log(err);
+      // }
+
       
-      try {
-        await imageRef.put(file);
-        message.success("Image uploaded successfully");
-        this.setState({ numImages: this.state.numImages + 1 });
-      } catch (err) {
-        message.error("Image failed to upload.");
-        console.log(err);
-      }
+
+      uploadTask.on(firebase.storage.TaskEvent.STATE_CHANGED,
+        (snapshot: { bytesTransferred: number; totalBytes: number; state: any; }) => {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log('upload is ' + progress + '% done');
+          this.setState({ progress });
+
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED:
+              console.log('Upload is paused');
+              break;
+            case firebase.storage.TaskState.RUNNING:
+              console.log('upload is running');
+              break;           
+
+
+          }
+        }, function(error: any) {
+          
+            console.log('upload errored');
+            message.error("Picture failed to upload");
+            
+        }, function(this: any, state: any) {
+          
+            console.log('upload complete');
+            message.success("Picture uploaded successfully!");
+            
+           
+        });
     }
   }
+
+  
 
   private getRandomInt(min: number, max: number) {
     min = Math.ceil(min);
@@ -120,11 +166,12 @@ class App extends React.Component<{}, State> {
     return (
       <div className="App" >
         <header className="App-header">
-          {/* <Button type="primary" onClick={() => message.info('This is a normal message')}>
-            Display normal message
-          </Button> */}
+           <Button type="primary" onClick={() => message.info('This is a normal message')}>
+            Display basic b**** message
+          </Button>
+          <Progress showInfo={this.state.showProgress} percent={this.state.progress}/>
           <img src={this.state.imgUrl} style={{ height: 300, width: 300 }} />
-          <button onClick={this.uploadImage}>Upload an image</button>
+          <Button onClick={this.uploadImage}>Upload an image</Button>
           <input type="file" id="file" ref={this.inputOpenFileRef} style={{ display: "none" }} onChange={this.handleFileSelection} />
         </header>
       </div >
