@@ -48,4 +48,6 @@ class FirebaseWrapper {
     }
 }
 
+export const FIREBASE_UPLOAD_TASK_EVENTS = firebase.storage.TaskEvent;
+export const FIREBASE_UPLOAD_TASK_STATE = firebase.storage.TaskState;
 export const firebaseWrapper: FirebaseWrapper = new FirebaseWrapper();
