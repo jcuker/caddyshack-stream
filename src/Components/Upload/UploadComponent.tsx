@@ -3,6 +3,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { firebaseWrapper, FIREBASE_UPLOAD_TASK_EVENTS, FIREBASE_UPLOAD_TASK_STATE } from '../../Util/FirebaseWrapper';
 import { message, Progress } from 'antd';
 import { Button } from 'antd/lib/radio';
+//@ts-ignore
+import * as Pica from 'pica';
+
 
 interface State {
     progress: number,
@@ -44,6 +47,24 @@ class UploadComponent extends Component<{}, State> {
 
             const uuid = uuidv4();
             const imageRef = firebaseWrapper.storage.child(uuid + imageType);
+
+            /*
+            var sizeOf = require('image-size');
+            var dimensions = sizeOf(file);
+            console.log(dimensions.width, dimensions.height);
+            */
+
+            //RESIZING IMAGE with recomended values
+            const picaObj = new Pica();
+
+            picaObj.resize(file, file, {
+                unsharpAmount: 100,
+                unsharpRadius: 0.6,
+                unsharpThreshold: 2
+            })
+
+            //dimensions = sizeOf(file);
+            //console.log(dimensions.width, dimensions.height);
 
             this.setState({ loading: true });
             const uploadTask = imageRef.put(file);
